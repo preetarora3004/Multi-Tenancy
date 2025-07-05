@@ -12,3 +12,115 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model Tenant {
+  id              String   @id @default(uuid())
+  name            String
+  ownerId         String?
+  owner           User?   @relation("TenantOwner", fields: [ownerId], references: [id])
+  users           User[]
+  workspaces      Workspace[]
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model User {
+  id             String      @id @default(uuid())
+  email          String      @unique
+  username       String
+  passwordHash   String
+  avatarUrl      String?
+  isActive       Boolean     @default(true)
+  tenantId       String?
+  tenant         Tenant?     @relation(fields: [tenantId], references: [id])
+  ownedTenants   Tenant[]    @relation("TenantOwner")
+  workspaces     Workspace[] @relation("WorkspaceMembers")
+  tasks          Task[]      @relation("TaskAssignees")
+  createdTasks   Task[]      @relation("TaskCreator")
+  invitations    Invitation[]
+  roles          Role[]      @relation("UserRoles")
+  refreshToken   String?
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  @@index([email])
+}
+
+model Role {
+  id        String   @id @default(uuid())
+  name      String
+  slug      String   @unique
+  permissions Json?
+  users     User[]   @relation("UserRoles")
+  workspaceId String?
+  workspace Workspace? @relation("WorkspaceRoles", fields: [workspaceId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Workspace {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id])
+  members     User[]   @relation("WorkspaceMembers")
+  roles       Role[]   @relation("WorkspaceRoles")
+  projects    Project[]
+  invites     Invitation[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Project {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id])
+  tasks       Task[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Task {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  status      String   @default("todo") // todo, in-progress, done
+  priority    String   @default("medium") // low, medium, high
+  dueDate     DateTime?
+  projectId   String
+  project     Project @relation(fields: [projectId], references: [id])
+  assignees   User[]   @relation("TaskAssignees")
+  creatorId   String
+  creator     User     @relation("TaskCreator", fields: [creatorId], references: [id])
+  subtasks    Subtask[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Subtask {
+  id        String   @id @default(uuid())
+  title     String
+  completed Boolean  @default(false)
+  taskId    String
+  task      Task     @relation(fields: [taskId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Invitation {
+  id            String   @id @default(uuid())
+  email         String
+  role          String?
+  expiresAt     DateTime
+  invitedById   String
+  invitedBy     User     @relation("SentInvitations", fields: [invitedById], references: [id])
+  workspaceId   String?
+  workspace     Workspace? @relation("Invitations", fields: [workspaceId], references: [id])
+  tenantId      String?
+  tenant        Tenant?  @relation("TenantInvitations", fields: [tenantId], references: [id])
+  accepted      Boolean  @default(false)
+  createdAt     DateTime @default(now())
+}
