@@ -8,3 +8,10 @@ export const adminRouter = new Hono<{
         JWT_SECRET : string,
     }
 }>()
+
+adminRouter.post("/signup", async (c)=>{
+    const prisma = new PrismaClient({
+        datasourceUrl : c.env.DATABASE_URL,
+    }).$extends(withAccelerate())
+
+})
