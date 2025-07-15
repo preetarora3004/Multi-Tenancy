@@ -1,7 +1,10 @@
+import { useNavigate } from "react-router-dom";
 
 export const HeroSection = () => {
+
+  const navigate = useNavigate();
   return (
-    <div className="w-screen h-163 flex flex-col justify-center items-center gap-7 ">
+    <div className="w-screen h-140 flex flex-col justify-center items-center gap-7 ">
       <div className="text-6xl font-bold w-180 text-center">
         Scale Your Saas with Multi-Tenant Architecture
       </div>
@@ -18,7 +21,9 @@ export const HeroSection = () => {
             className="flex justify-center rounded-md h-11 bg-black py-2.5 px-5 w-60 border border-transparent text-center text-base text-white transition-all shadow-sm hover:shadow-lg focus:bg-slate-800 focus:shadow-none active:bg-slate-700 hover:bg-slate-800 active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
             type="button"
           >
-            <div className="flex items-center space-x-2 text-xl">
+            <div className="flex items-center space-x-2 text-xl" onClick={()=>{
+              navigate("/signup")
+            }}>
               <span>Start Free Trial</span>
               <svg
                 xmlns="http://www.w3.org/2000/svg"

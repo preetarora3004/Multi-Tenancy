@@ -3,7 +3,7 @@ import { withAccelerate } from "@prisma/extension-accelerate";
 import { Hono } from "hono";
 import { sign } from "hono/jwt";
 import bcrypt from "bcryptjs";
-import { authMiddleware } from "../auth/userauth";
+import { authUserMiddleware } from "../auth/userauth";
 
 export const userRouter = new Hono<{
     Bindings: {
@@ -28,10 +28,20 @@ userRouter.post("/signup", async (c) => {
         const user = await prisma.user.create({
             data: {
                 password: hashpassword,
-                username: body.username,
+                firstname: body.firstname,
+                lastname : body.lastname,
                 email: body.email,
+                agreeToTerms : body.agreeToTerms,
+                agreeToUpdates : body.agreeToUpdates
             },
         });
+
+        if(body.agreeToTerms === false){
+            c.status(411);
+            c.json({
+                msg : "Please Accept the Terms and Condition"
+            })
+        }
 
         const token = await sign({ id: user.id }, c.env.JWT_SECRET);
 
@@ -55,7 +65,7 @@ userRouter.post("/signin", async (c) => {
 
     const user = await prisma.user.findUnique({
         where: {
-            username: body.username,
+            email: body.email,
         },
     });
 
@@ -73,7 +83,7 @@ userRouter.post("/signin", async (c) => {
     });
 });
 
-userRouter.post("/create/tenant", authMiddleware, async (c) => {
+userRouter.post("/create/tenant", authUserMiddleware, async (c) => {
     const prisma = new PrismaClient({
         datasourceUrl: c.env.DATABASE_URL,
     }).$extends(withAccelerate());
@@ -95,12 +105,13 @@ userRouter.post("/create/tenant", authMiddleware, async (c) => {
                 },
                 data: {
                     tenantId: tenant.id,
+                    isOwner : true
                 },
             });
         });
 
         return c.json({
-            msg: "Successfully Created"
+            msg: "Successfully Created"  
         });
     } catch (e) {
         c.status(401);

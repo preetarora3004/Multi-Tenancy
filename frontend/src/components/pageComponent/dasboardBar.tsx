@@ -1,9 +1,7 @@
 import { Building2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-
-
-export const AppBar = () => {
+export const DashboardBar = () => {
 
   const navigate = useNavigate();
 

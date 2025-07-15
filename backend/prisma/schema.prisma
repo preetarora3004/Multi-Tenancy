@@ -21,8 +21,12 @@ model Tenant {
 model User {
   id             String      @id @default(uuid())
   email          String      @unique
-  username       String      @unique
+  firstname      String      
+  lastname       String
+  isOwner        Boolean     @default(false)
   password       String
+  agreeToTerms   Boolean     @default(false)
+  agreeToUpdates Boolean     @default(false)
   avatarUrl      String?
   isActive       Boolean     @default(true)
   tenantId       String?

@@ -1,5 +1,5 @@
 export const Banner = ()=> {
-    return <div className="grid grid-cols-4 h-55  bg-banner">
+    return <div className="grid grid-cols-4 h-50 bg-banner">
         <div className="flex flex-col justify-center items-center">
             <div className="text-4xl font-bold">
                 10,000+

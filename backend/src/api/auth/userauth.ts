@@ -1,9 +1,9 @@
 import { MiddlewareHandler } from "hono";
 import { verify } from "hono/jwt";
 
-export const authMiddleware : MiddlewareHandler = async (c,next)=>{
+export const authUserMiddleware : MiddlewareHandler = async (c,next)=>{
 
-    const jwt = c.req.header("Authorization")
+    const jwt = c.req.header("Authorization") || ""
 
     if(!jwt){
         c.status(401);
